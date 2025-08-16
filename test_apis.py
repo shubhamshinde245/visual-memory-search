@@ -10,6 +10,10 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+# OpenAI model configuration - using latest models
+OPENAI_EMBEDDING_MODEL = "text-embedding-3-large"  # Latest embedding model with 3072 dimensions
+OPENAI_VISION_MODEL = "gpt-4o"  # Latest multimodal model
+
 def test_openai():
     """Test OpenAI API connection."""
     try:
@@ -20,12 +24,30 @@ def test_openai():
         
         client = openai.OpenAI(api_key=api_key)
         response = client.embeddings.create(
-            model="text-embedding-3-small",
+            model=OPENAI_EMBEDDING_MODEL,
             input="test"
         )
-        return True, "OpenAI API ✅ Working"
+        return True, f"OpenAI API ✅ Working (using {OPENAI_EMBEDDING_MODEL})"
     except Exception as e:
         return False, f"OpenAI API ❌ Error: {str(e)}"
+
+def test_openai_gpt4o():
+    """Test OpenAI GPT-4o model access."""
+    try:
+        import openai
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            return False, "OpenAI API key not found in .env file"
+        
+        client = openai.OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model=OPENAI_VISION_MODEL,
+            messages=[{"role": "user", "content": "Hello, this is a test."}],
+            max_tokens=10
+        )
+        return True, f"OpenAI GPT-4o ✅ Working (using {OPENAI_VISION_MODEL})"
+    except Exception as e:
+        return False, f"OpenAI GPT-4o ❌ Error: {str(e)}"
 
 def test_aws_textract():
     """Test AWS Textract API connection."""
@@ -91,7 +113,7 @@ def test_aws_rekognition():
 def test_pinecone():
     """Test Pinecone API connection."""
     try:
-        from pinecone import Pinecone
+        import pinecone
         
         api_key = os.getenv('PINECONE_API_KEY')
         
@@ -99,7 +121,7 @@ def test_pinecone():
             return False, "Pinecone API key not found in .env file"
         
         # Initialize modern Pinecone client
-        pc = Pinecone(api_key=api_key)
+        pc = pinecone.Pinecone(api_key=api_key)
         
         # List indexes to test connection
         indexes = pc.list_indexes()
@@ -114,6 +136,7 @@ def main():
     
     tests = [
         ("OpenAI", test_openai),
+        ("OpenAI GPT-4o", test_openai_gpt4o),
         ("AWS Textract", test_aws_textract),
         ("AWS Rekognition", test_aws_rekognition),
         ("Pinecone", test_pinecone)

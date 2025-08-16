@@ -1,53 +1,63 @@
 # 🔍 Visual Memory Search
 
-A powerful AI-powered screenshot search application that lets you find images using natural language queries. Built with Streamlit and powered by OpenAI, AWS Textract, AWS Rekognition, and Pinecone.
+A powerful visual search application that allows you to upload screenshots and search through them using natural language queries. Built with the latest AI technologies including **OpenAI's newest models** (GPT-4o, text-embedding-3-large), AWS services, and Pinecone vector database.
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://visual-memory-search.streamlit.app/)
+## 🚀 Latest Updates
+
+**December 2024**: Now using the latest OpenAI models:
+- **`text-embedding-3-large`** - 3072 dimensions for highest quality embeddings
+- **`gpt-4o`** - Advanced multimodal vision understanding
+- **Enhanced image analysis** with GPT-4o's vision capabilities
+- **Cost monitoring** and model recommendations
+- **Automatic fallback** mechanisms for robust processing
 
 ## ✨ Features
 
-- **🔍 Natural Language Search**: Find screenshots using everyday language
-- **📝 OCR Text Extraction**: Automatically reads text from images using AWS Textract
-- **🔍 Image Analysis**: Detects objects and scenes using AWS Rekognition
-- **🧠 AI-Powered Understanding**: Uses OpenAI embeddings for intelligent image and text matching
-- **⚡ Fast & Scalable**: Cloud-based processing with Pinecone vector database
-- **📱 User-Friendly**: Clean Streamlit interface with detailed explanations
+- **🔍 Natural Language Search**: Search screenshots using plain English descriptions
+- **🤖 Latest AI Models**: Powered by OpenAI's newest GPT-4o and text-embedding-3-large
+- **📱 Screenshot Processing**: Upload multiple screenshots (PNG, JPG, JPEG)
+- **📝 Text Extraction**: Advanced OCR using AWS Textract
+- **🖼️ Image Analysis**: Comprehensive analysis using AWS Rekognition + GPT-4o
+- **🧠 Vector Search**: Fast similarity search using Pinecone
+- **💰 Cost Monitoring**: Real-time cost estimates and optimization tips
+- **🔄 Fallback Support**: Robust processing with multiple analysis paths
 
 ## 🚀 Quick Start
 
-### 1. Get API Keys
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd visual-memory-search
+   ```
 
-You'll need API keys from these services:
-- **OpenAI**: [Get API Key](https://platform.openai.com/api-keys)
-- **AWS**: [Create IAM User](https://console.aws.amazon.com/iam/) (for Textract & Rekognition)
-- **Pinecone**: [Sign Up](https://app.pinecone.io/)
+2. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### 2. Setup Environment
+3. **Set up API keys**:
+   - Copy `env_template.txt` to `.env`
+   - Add your API keys for OpenAI, AWS, and Pinecone
+
+4. **Test your setup**:
+   ```bash
+   python test_apis.py
+   ```
+
+5. **Run the app**:
+   ```bash
+   streamlit run streamlit_app.py
+   ```
+
+## 🔧 Pinecone Migration
+
+If you have an existing Pinecone index with different dimensions, use the migration utility:
 
 ```bash
-# Clone the repository
-git clone <your-repo-url>
-cd visual-memory-search
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Copy environment template
-cp env_template.txt .env
-
-# Edit .env with your API keys
-nano .env
+python migrate_pinecone_index.py
 ```
 
-### 3. Test APIs
-
-```bash
-# Verify all APIs are working
-python3 test_apis.py
-
-# Start the app
-streamlit run streamlit_app.py
-```
+This will help resolve dimension mismatches between your index and the new OpenAI models.
 
 ## 📋 Requirements
 
