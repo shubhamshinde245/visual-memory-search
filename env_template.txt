@@ -1,0 +1,22 @@
+# API Keys for Visual Memory Search
+# Copy this file to .env and fill in your actual API keys
+
+# OpenAI API Key (for GPT-4 Vision)
+# Get from: https://platform.openai.com/api-keys
+OPENAI_API_KEY=your_openai_api_key_here
+
+# AWS Credentials (for Textract OCR and Rekognition)
+# Get from: https://console.aws.amazon.com/iam/
+AWS_ACCESS_KEY_ID=your_aws_access_key_id_here
+AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key_here
+AWS_REGION=us-east-1
+
+# Pinecone API Key (for vector database)
+# Get from: https://app.pinecone.io/
+PINECONE_API_KEY=your_pinecone_api_key_here
+PINECONE_INDEX_NAME=visual-memory-search
+
+# Optional: Azure OpenAI (alternative to OpenAI)
+# AZURE_OPENAI_API_KEY=your_azure_openai_key_here
+# AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+# AZURE_OPENAI_API_VERSION=2024-02-15-preview
