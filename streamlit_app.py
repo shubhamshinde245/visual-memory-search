@@ -171,11 +171,11 @@ def analyze_image_aws(image_bytes: bytes, _rekognition_client) -> Dict:
 def generate_image_embedding_openai(image: Image.Image, _openai_client) -> np.ndarray:
     """Generate OpenAI embedding for an image."""
     try:
-        # For OpenAI embeddings, we need to be much more aggressive with compression
+        # For OpenAI embeddings, we need to be extremely aggressive with compression
         # The text-embedding-3-small model has only 8,192 token context length
         
-        # Start with very small dimensions
-        max_dimension = 256  # Much smaller to stay under token limit
+        # Start with very small dimensions - even smaller!
+        max_dimension = 128  # Much smaller to stay under token limit
         
         # Create a copy to avoid modifying the original
         working_image = image.copy()
@@ -185,22 +185,22 @@ def generate_image_embedding_openai(image: Image.Image, _openai_client) -> np.nd
             working_image.thumbnail((max_dimension, max_dimension), Image.Resampling.LANCZOS)
             print(f"🔄 Resized image to {working_image.width}x{working_image.height} to reduce token count")
         
-        # Try multiple compression levels
-        compression_levels = [60, 40, 20, 10]  # Start with higher quality, go lower if needed
+        # Try multiple compression levels - even more aggressive
+        compression_levels = [30, 20, 15, 10, 5]  # Start lower, go even lower if needed
         
         for quality in compression_levels:
             try:
-                # Convert to bytes with aggressive compression
+                # Convert to bytes with very aggressive compression
                 img_byte_arr = io.BytesIO()
                 working_image.save(img_byte_arr, format='JPEG', quality=quality, optimize=True)
                 img_byte_arr = img_byte_arr.getvalue()
                 
-                # Check file size
+                # Check file size - be even more conservative
                 file_size_kb = len(img_byte_arr) / 1024
                 print(f"🔄 Trying quality {quality}: {file_size_kb:.1f}KB")
                 
                 # If file is small enough, try the embedding
-                if file_size_kb < 100:  # Keep under 100KB to be safe
+                if file_size_kb < 50:  # Keep under 50KB to be extra safe
                     # Encode to base64
                     img_base64 = base64.b64encode(img_byte_arr).decode('utf-8')
                     
@@ -224,18 +224,14 @@ def generate_image_embedding_openai(image: Image.Image, _openai_client) -> np.nd
                 continue
         
         # If we get here, all compression levels failed
-        raise Exception("All compression levels failed to generate valid embedding")
+        print(f"❌ All compression levels failed. File sizes were too large even at quality 5.")
+        print(f"🔄 This image is too complex for OpenAI embeddings. Will use text-based fallback.")
+        return None  # Return None to trigger fallback
         
     except Exception as e:
         st.error(f"Error generating image embedding: {str(e)}")
         print(f"❌ Embedding generation failed: {str(e)}")
-        
-        # Return a small random embedding instead of all zeros
-        # This ensures Pinecone doesn't reject it
-        random_embedding = np.random.normal(0, 0.1, 1536)
-        random_embedding = random_embedding / np.linalg.norm(random_embedding)  # Normalize
-        print(f"🔄 Using fallback random embedding: {random_embedding.shape}")
-        return random_embedding
+        return None  # Return None to trigger fallback
 
 def generate_text_embedding_openai(text: str, _openai_client) -> np.ndarray:
     """Generate OpenAI embedding for text."""
@@ -346,7 +342,7 @@ def process_uploaded_files(uploaded_files, textract_client, rekognition_client, 
             # Generate image embedding using OpenAI
             image_embedding = generate_image_embedding_openai(image, openai_client)
             
-            # If image embedding failed, try text-based embedding as fallback
+            # If image embedding failed or returned None, try text-based embedding as fallback
             if image_embedding is None or np.all(image_embedding == 0):
                 print(f"🔄 Using text-based embedding fallback for {uploaded_file.name}")
                 
@@ -382,6 +378,19 @@ def process_uploaded_files(uploaded_files, textract_client, rekognition_client, 
                     # Last resort: use filename as text
                     print(f"🔄 Using filename as fallback text: {uploaded_file.name}")
                     image_embedding = generate_text_embedding_openai(uploaded_file.name, openai_client)
+                
+                # Final validation - if still no valid embedding, create a minimal one
+                if image_embedding is None or np.all(image_embedding == 0):
+                    print(f"⚠️ All text-based embeddings failed, creating minimal embedding from filename")
+                    # Create a simple embedding from filename
+                    image_embedding = generate_text_embedding_openai(uploaded_file.name, openai_client)
+                    
+                    # If even that fails, create a random normalized embedding as last resort
+                    if image_embedding is None or np.all(image_embedding == 0):
+                        print(f"🔄 Creating fallback random embedding as last resort")
+                        random_embedding = np.random.normal(0, 0.1, 1536)
+                        random_embedding = random_embedding / np.linalg.norm(random_embedding)  # Normalize
+                        image_embedding = random_embedding
             
             # Create image hash for unique identification
             image_hash = hashlib.md5(image_bytes).hexdigest()

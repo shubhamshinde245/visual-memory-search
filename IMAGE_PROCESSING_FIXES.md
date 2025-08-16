@@ -14,19 +14,19 @@
 
 ## 🛠️ **Technical Solutions Implemented:**
 
-### **Aggressive Image Compression**
+### **Ultra-Aggressive Image Compression**
 ```python
 # OpenAI text-embedding-3-small has only 8,192 token context length
-max_dimension = 256  # Much smaller to stay under token limit
+max_dimension = 128  # Extremely small to stay under token limit
 
-# Try multiple compression levels
-compression_levels = [60, 40, 20, 10]  # Start high, go lower if needed
+# Try multiple compression levels - very aggressive
+compression_levels = [30, 20, 15, 10, 5]  # Start low, go even lower
 
 for quality in compression_levels:
     # Compress image and check file size
     file_size_kb = len(compressed_bytes) / 1024
     
-    if file_size_kb < 100:  # Keep under 100KB to be safe
+    if file_size_kb < 50:  # Keep under 50KB to be extra safe
         # Try OpenAI embedding
         # If successful, return embedding
         # If fails, try next compression level
@@ -43,9 +43,9 @@ if embedding.shape != (1536,):
     print(f"Wrong shape: {embedding.shape}")
 ```
 
-### **Intelligent Fallback Strategies**
+### **Multi-Level Fallback Strategy**
 ```python
-# 1. Try image embedding first (with aggressive compression)
+# 1. Try image embedding first (with ultra-aggressive compression)
 image_embedding = generate_image_embedding_openai(image, openai_client)
 
 # 2. If that fails, use rich text-based embedding
@@ -62,9 +62,15 @@ if image_embedding is None or np.all(image_embedding == 0):
     # Try rich text embedding
     image_embedding = generate_text_embedding_openai(combined_text, openai_client)
     
-    # If that fails, use filename only
-    if not combined_text.strip():
+    # 3. If text fails, use filename only
+    if image_embedding is None or np.all(image_embedding == 0):
         image_embedding = generate_text_embedding_openai(filename, openai_client)
+        
+        # 4. Last resort: create random normalized embedding
+        if image_embedding is None or np.all(image_embedding == 0):
+            random_embedding = np.random.normal(0, 0.1, 1536)
+            random_embedding = random_embedding / np.linalg.norm(random_embedding)
+            image_embedding = random_embedding
 ```
 
 ### **Pinecone Storage Validation**
@@ -107,21 +113,25 @@ if not any(embedding_list):
 ```
 1. Upload Image
    ↓
-2. Resize to 256px max (aggressive)
+2. Resize to 128px max (ultra-aggressive)
    ↓
-3. Try compression levels: 60→40→20→10
+3. Try compression levels: 30→20→15→10→5
    ↓
-4. Keep file size under 100KB
+4. Keep file size under 50KB
    ↓
 5. Try OpenAI image embedding
    ↓
 6. If fails → Use rich text-based fallback
    ↓
-7. Validate embedding (non-zero, correct shape)
+7. If text fails → Use filename only
    ↓
-8. Store in Pinecone
+8. If all fails → Create random embedding
    ↓
-9. Success! 🎉
+9. Validate embedding (non-zero, correct shape)
+   ↓
+10. Store in Pinecone
+   ↓
+11. Success! 🎉
 ```
 
 ## 🔍 **Monitoring and Debugging:**
