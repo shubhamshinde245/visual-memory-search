@@ -481,7 +481,7 @@ def main():
     st.markdown("Upload screenshots and search through them using natural language queries. Powered by OpenAI, AWS Textract, AWS Rekognition, and Pinecone.")
     
     # Check if API keys are configured
-    required_env_vars = ['OPENAI_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'PINECONE_API_KEY', 'PINECONE_ENVIRONMENT']
+    required_env_vars = ['OPENAI_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'PINECONE_API_KEY']
     missing_vars = [var for var in required_env_vars if not os.getenv(var)]
     
     if missing_vars:
