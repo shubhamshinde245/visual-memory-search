@@ -1,5 +1,7 @@
 # 🔍 Visual Memory Search
 
+[APP LINK](https://visual-memory-search.streamlit.app/)
+
 A powerful visual search application that allows you to upload screenshots and search through them using natural language queries. Built with the latest AI technologies including **OpenAI's newest models** (GPT-4o, text-embedding-3-large), AWS services, and Pinecone vector database.
 
 ## 🚀 Latest Updates
